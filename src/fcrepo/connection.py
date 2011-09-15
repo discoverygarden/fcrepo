@@ -89,6 +89,13 @@ class Connection(object):
                 attempts -= 1
                 if not attempts:
                     raise
+            except FedoraConnectionException, e:
+                attempts -= 1
+                if not attempts or e.httpcode not in [409]:
+                    raise
+                else:
+                    logging.exception('Got HTTP code %s in open... Retrying...' % e.httpcode)
+                    self._reconnect()
         if not self.persistent:
            self.close()
         
