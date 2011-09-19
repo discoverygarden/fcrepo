@@ -5,6 +5,7 @@ import socket
 import httplib
 import urlparse
 import logging
+from time import sleep
 
 class APIException(Exception):
     """ An exception in the general usage of the API """
@@ -96,6 +97,7 @@ class Connection(object):
                 else:
                     logging.exception('Got HTTP code %s in open... Retrying...' % e.httpcode)
                     self._reconnect()
+                    sleep(5)
         if not self.persistent:
            self.close()
         
