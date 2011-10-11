@@ -90,9 +90,10 @@ class Connection(object):
                 attempts -= 1
                 if not attempts:
                     raise
-            except FedoraConnectionException, e:
+            except FedoraConnectionException as e:
                 attempts -= 1
                 if not attempts or e.httpcode not in [409]:
+                    logging.exception('Got HTTP code %s in open...  Failure.' % e.httpcode)
                     raise
                 else:
                     logging.exception('Got HTTP code %s in open... Retrying...' % e.httpcode)
