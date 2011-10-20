@@ -97,7 +97,7 @@ class FedoraDatastream(object):
     createdDate = property(lambda self: self._info['createdDate'])
     controlGroup = property(lambda self: self._info['controlGroup'])
     size = typedproperty(lambda self: self._info['size'], pytype=int)
-    checksum = property(lambda self: self._info['formatURI'])
+    checksum = property(lambda self: self._info['checksum'])
 
 
 
