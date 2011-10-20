@@ -133,30 +133,33 @@ class FedoraClient(object):
         response.close()
         doc = etree.fromstring(xml)
         result = {}
+        tags = {
+            'dsLabel': 'label',
+            'dsVerionId': 'versionId',
+            'dsCreateDate': 'createdDate',
+            'dsState': 'state',
+            'dsMIME': 'mimeType',
+            'dsFormatURI': 'formatURI',
+            'dsControlGroup': 'controlGroup',
+            'dsSize': 'size',
+            'dsVersionable': 'versionable',
+            'dsInfoType': 'infoType',
+            'dsLocation': 'location',
+            'dsLocationType': 'locationType',
+            'dsChecksum': 'checksum',
+            'dsChecksumType': 'checksumType'
+        }
+        
         for child in doc:
             # rename elementnames to match property names in foxml
             # the xml data is namespaced in 3.4, but not in 3.3, so strip out
             # the namespace, to be compatible with both
-            name = {'dsLabel': 'label',
-                    'dsVerionId': 'versionId',
-                    'dsCreateDate': 'createdDate',
-                    'dsState': 'state',
-                    'dsMIME': 'mimeType',
-                    'dsFormatURI': 'formatURI',
-                    'dsControlGroup': 'controlGroup',
-                    'dsSize': 'size',
-                    'dsVersionable': 'versionable',
-                    'dsInfoType': 'infoType',
-                    'dsLocation': 'location',
-                    'dsLocationType': 'locationType',
-                    'dsChecksum': 'checksum',
-                    'dsChecksumType': 'checksumType'}.get(child.tag.split('}')[-1])
-            if name is None or child.text is None:
-                continue
-            value = child.text
-            if not isinstance(value, unicode):
-                value = value.decode('utf8')
-            result[name] = value
+            name = tags.get(child.tag.rpartition('}')[2], None)
+            if name is not None:
+                value = child.text
+                if value and not isinstance(value, unicode):
+                    value = value.decode('utf8')
+                result[name] = value
         return result
 
     def modifyDatastream(self, pid, dsid, body='', **params):
