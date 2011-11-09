@@ -82,7 +82,8 @@ class WADLRequest(object):
 class API(object):
     def __init__(self, connection):
         self.connection = connection
-        fp = self.connection.open('/objects/application.wadl')
+        # hack for APIA auth
+        fp = self.connection.open('/objects/application.wadl', headers=self.connection.form_headers)
         wadl_xml = fp.read()
         fp.close()
         self.doc = etree.fromstring(wadl_xml)
