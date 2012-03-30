@@ -24,12 +24,21 @@ class FedoraClient(object):
                                   format=format)
         xml = response.read()
         response.close()
+        '''
+        The following use of default namespace is to make this code work in 3.4 and 3.5 where the namespacing is different
+        '''
         doc = etree.fromstring(xml)
-        ids = [id.decode('utf8') for id in doc.xpath('/pidList/pid/text()')]
+        fake_namespace_dictionary = {}
+        try:
+            fake_namespace_dictionary['default'] = doc.nsmap[None]
+            ids = [id.decode('utf8') for id in doc.xpath('/default:pidList/default:pid/text()', namespaces = fake_namespace_dictionary)]
+        except KeyError:
+            ids = [id.decode('utf8') for id in doc.xpath('/pidList/pid/text()')]
+            
         if len(ids) == 1:
             return ids[0]
         return ids
-        
+
     def createObject(self, pid, label, state=u'A'):
         foxml = ElementMaker(namespace=NSMAP['foxml'], nsmap=NSMAP)
         foxml_state = {'A': u'Active',
