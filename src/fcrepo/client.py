@@ -272,7 +272,9 @@ class FedoraClient(object):
                                                   'limit':limit,
                                                   'type':type,
                                                   'dt':dt})
-        headers = {'Accept:': 'text/xml'}
+        #Fedora started needing authentication in 3.5 for RI
+        headers = self.api.connection.form_headers
+        headers['Accept:'] = 'text/xml'
         response = self.api.connection.open(url, '', headers, method='POST')
         xml = response.read()
         doc = etree.fromstring(xml)
