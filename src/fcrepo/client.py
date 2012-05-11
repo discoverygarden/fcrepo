@@ -272,7 +272,7 @@ class FedoraClient(object):
                                                   'limit':limit,
                                                   'type':type,
                                                   'dt':dt})
-        #Fedora started needing authentication in 3.5 for RI
+        #Fedora started needing authentication in 3.5 for RI, tested in 3.4 as well
         headers = self.api.connection.form_headers
         headers['Accept:'] = 'text/xml'
         response = self.api.connection.open(url, '', headers, method='POST')
