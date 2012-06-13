@@ -264,14 +264,20 @@ class FedoraClient(object):
                 
     def searchTriples(self, query, lang='sparql', format='Sparql',
                       limit=100, type='tuples', dt='on', flush=True):
+        
         flush = str(flush).lower()
-        url = u'/risearch?%s' % urllib.urlencode({'query':query,
-                                                  'lang':lang,
-                                                  'flush': flush,
-                                                  'format':format,
-                                                  'limit':limit,
-                                                  'type':type,
-                                                  'dt':dt})
+        URL_pramaters = {'query':query,
+                   'lang':lang,
+                   'flush': flush,
+                   'format':format,
+                   'type':type,
+                   'dt':dt}
+        
+        #conditionaly set limit if there is one. (so it can be set to None)
+        if limit:
+            URL_pramaters['limit'] = limit
+            
+        url = u'/risearch?%s' % urllib.urlencode(URL_pramaters)
         #Fedora started needing authentication in 3.5 for RI, tested in 3.4 as well
         headers = self.api.connection.form_headers
         headers['Accept:'] = 'text/xml'
