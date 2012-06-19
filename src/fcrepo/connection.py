@@ -76,11 +76,8 @@ class Connection(object):
 
         while attempts:
             try:
-                logging.debug('Trying %s on %s with headers %s' % (method, url, headers))
+                logging.debug('Trying %s on %s' % (method, url))
                 #we can't have unicode characters floating around in the body
-                if isinstance(body, basestring):
-                    logging.debug('Sending body:  %s' % body)
-                #    body=body.encode('ascii','xmlcharrefreplace')
                 self.conn.request(method, url, body, headers)
                 return check_response_status(self.conn.getresponse())
             except (socket.error,
