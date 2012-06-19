@@ -71,6 +71,11 @@ class WADLRequest(object):
         for param, value in self.undocumented_params.items():
             if not param in qs:
                 qs[param] = value
+        
+        #change to utf8 to let unicode pass through urlencode
+        for key in qs:
+            qs[key] = qs[key].encode('utf8')
+
         if qs:
             self.url = '%s?%s' % (self.url, urllib.urlencode(qs))
 
