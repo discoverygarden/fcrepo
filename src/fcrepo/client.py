@@ -4,6 +4,8 @@
 import urllib
 from collections import defaultdict
 
+from copy import copy
+
 from lxml import etree
 from lxml.builder import ElementMaker
 
@@ -279,7 +281,7 @@ class FedoraClient(object):
             
         url = u'/risearch?%s' % urllib.urlencode(URL_pramaters)
         #Fedora started needing authentication in 3.5 for RI, tested in 3.4 as well
-        headers = self.api.connection.form_headers
+        headers = copy(self.api.connection.form_headers)
         headers['Accept:'] = 'text/xml'
         response = self.api.connection.open(url, '', headers, method='POST')
         xml = response.read()
