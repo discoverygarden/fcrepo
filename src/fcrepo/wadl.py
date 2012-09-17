@@ -71,6 +71,11 @@ class WADLRequest(object):
         for param, value in self.undocumented_params.items():
             if not param in qs:
                 qs[param] = value
+        
+        #change to utf8 to let unicode pass through urlencode
+        for key in qs:
+            qs[key] = qs[key].encode('utf8')
+
         if qs:
             self.url = '%s?%s' % (self.url, urllib.urlencode(qs))
 
@@ -82,7 +87,8 @@ class WADLRequest(object):
 class API(object):
     def __init__(self, connection):
         self.connection = connection
-        fp = self.connection.open('/objects/application.wadl')
+        # hack for APIA auth
+        fp = self.connection.open('/objects/application.wadl', headers=self.connection.form_headers)
         wadl_xml = fp.read()
         fp.close()
         self.doc = etree.fromstring(wadl_xml)

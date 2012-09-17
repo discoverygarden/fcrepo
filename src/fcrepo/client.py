@@ -4,6 +4,8 @@
 import urllib
 from collections import defaultdict
 
+from copy import copy
+
 from lxml import etree
 from lxml.builder import ElementMaker
 
@@ -24,12 +26,21 @@ class FedoraClient(object):
                                   format=format)
         xml = response.read()
         response.close()
+        '''
+        The following use of default namespace is to make this code work in 3.4 and 3.5 where the namespacing is different
+        '''
         doc = etree.fromstring(xml)
-        ids = [id.decode('utf8') for id in doc.xpath('/pidList/pid/text()')]
+        fake_namespace_dictionary = {}
+        try:
+            fake_namespace_dictionary['default'] = doc.nsmap[None]
+            ids = [id.decode('utf8') for id in doc.xpath('/default:pidList/default:pid/text()', namespaces = fake_namespace_dictionary)]
+        except KeyError:
+            ids = [id.decode('utf8') for id in doc.xpath('/pidList/pid/text()')]
+            
         if len(ids) == 1:
             return ids[0]
         return ids
-        
+
     def createObject(self, pid, label, state=u'A'):
         foxml = ElementMaker(namespace=NSMAP['foxml'], nsmap=NSMAP)
         foxml_state = {'A': u'Active',
@@ -255,15 +266,23 @@ class FedoraClient(object):
                 
     def searchTriples(self, query, lang='sparql', format='Sparql',
                       limit=100, type='tuples', dt='on', flush=True):
+        
         flush = str(flush).lower()
-        url = u'/risearch?%s' % urllib.urlencode({'query':query,
-                                                  'lang':lang,
-                                                  'flush': flush,
-                                                  'format':format,
-                                                  'limit':limit,
-                                                  'type':type,
-                                                  'dt':dt})
-        headers = {'Accept:': 'text/xml'}
+        URL_pramaters = {'query':query,
+                   'lang':lang,
+                   'flush': flush,
+                   'format':format,
+                   'type':type,
+                   'dt':dt}
+        
+        #conditionaly set limit if there is one. (so it can be set to None)
+        if limit:
+            URL_pramaters['limit'] = limit
+            
+        url = u'/risearch?%s' % urllib.urlencode(URL_pramaters)
+        #Fedora started needing authentication in 3.5 for RI, tested in 3.4 as well
+        headers = copy(self.api.connection.form_headers)
+        headers['Accept:'] = 'text/xml'
         response = self.api.connection.open(url, '', headers, method='POST')
         xml = response.read()
         doc = etree.fromstring(xml)
