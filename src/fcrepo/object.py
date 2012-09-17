@@ -2,7 +2,10 @@
 # See also LICENSE.txt
 
 from fcrepo.datastream import FedoraDatastream, RELSEXTDatastream, DCDatastream
+from fcrepo.connection import FedoraConnectionException
+import logging
 
+logger = logging.getLogger('fcrepo.object.FedoraObject')
 class FedoraObject(object):
     def __init__(self, pid, client):
         self.pid = pid
@@ -31,7 +34,22 @@ class FedoraObject(object):
 
     def datastreams(self):
         if self._dsids is None:
-            self._dsids = self.client.listDatastreams(self.pid)
+            '''
+            XXX: Wrapped in try/except, as it can cause race condition issues when
+            attempting to use the 'in' operator, when trying to determine if an
+            object contains a certain datastream.
+   
+            Race condition:
+            1. We get the object (profile) as a FedoraObject
+            2. Another system purges the object
+            3. We got the object, so we try to enumate the DSs via the 'in'
+              operator, and fail.
+            '''
+            try:
+                self._dsids = self.client.listDatastreams(self.pid)
+            except FedoraConnectionException:
+                self._dsids = []
+                logger.debug('Unable to get the list of datastream! (perhaps the object has been purged?) Returning an empty list.')
         return self._dsids
 
     def __iter__(self):

@@ -75,9 +75,7 @@ class FedoraDatastream(object):
     state = property(lambda self: self._info['state'],
                            lambda self, value: self._setProperty('state',
                                                                  value))
-    checksumType = property(lambda self: self._info['checksumType'],
-                            lambda self, value: self._setProperty('checksumType',
-                                                                 value))
+    
     versionId = property(lambda self: self._info['versionId'],
                         lambda self, value: self._setProperty('versionId',
                                                               value)) 
@@ -98,6 +96,7 @@ class FedoraDatastream(object):
     controlGroup = property(lambda self: self._info['controlGroup'])
     size = typedproperty(lambda self: self._info['size'], pytype=int)
     checksum = property(lambda self: self._info['checksum'])
+    checksumType = property(lambda self: self._info['checksumType'])
 
 
 
