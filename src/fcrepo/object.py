@@ -49,7 +49,7 @@ class FedoraObject(object):
                 self._dsids = self.client.listDatastreams(self.pid)
             except FedoraConnectionException:
                 self._dsids = []
-                logger.exception('Unable to get the list of datastream! (perhaps the object has been purged?) Returning an empty list.')
+                logger.debug('Unable to get the list of datastream! (perhaps the object has been purged?) Returning an empty list.')
         return self._dsids
 
     def __iter__(self):
