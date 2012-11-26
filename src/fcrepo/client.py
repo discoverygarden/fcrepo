@@ -278,7 +278,11 @@ class FedoraClient(object):
         #conditionaly set limit if there is one. (so it can be set to None)
         if limit:
             URL_pramaters['limit'] = limit
-            
+        
+        # Encode in utf8 to let unicode pass through urlencode
+        for key in URL_pramaters:
+            URL_pramaters[key] = URL_pramaters[key].encode('utf8')
+        
         url = u'/risearch?%s' % urllib.urlencode(URL_pramaters)
         #Fedora started needing authentication in 3.5 for RI, tested in 3.4 as well
         headers = copy(self.api.connection.form_headers)
