@@ -2,12 +2,14 @@
 # See also LICENSE.txt
 
 import urllib
+import newrelic.agent
 
 from lxml import etree
 
 NSMAP = {'wadl': 'http://research.sun.com/wadl/2006/10'}
 
 class WADLMethod(object):
+    @newrelic.agent.function_trace()
     def __init__(self, id, name, api):
         self.id = id
         self.api = api
@@ -21,12 +23,14 @@ class WADLMethod(object):
         # XXX hack to fix broken fedora wadl.
         if not self.url.startswith('/objects'):
             self.url = '/objects%s' % self.url
-        
+    
+    @newrelic.agent.function_trace()
     def __call__(self, **params):
         url = self.url % params
         return WADLRequest(url, self)
 
 class WADLRequest(object):
+    @newrelic.agent.function_trace()
     def __init__(self, url, method):
         self.url = url
         self.method = method
@@ -48,7 +52,7 @@ class WADLRequest(object):
             if default_value:
                 self.default_values[name] = default_value
         
-
+    @newrelic.agent.function_trace()
     def submit(self, body='', **params):
         qs = self.default_values.copy()
         for param, value in params.items():
@@ -85,6 +89,7 @@ class WADLRequest(object):
                                                method=self.method.name)
     
 class API(object):
+    @newrelic.agent.function_trace()
     def __init__(self, connection):
         self.connection = connection
         # hack for APIA auth

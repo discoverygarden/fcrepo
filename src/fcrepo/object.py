@@ -4,9 +4,11 @@
 from fcrepo.datastream import FedoraDatastream, RELSEXTDatastream, DCDatastream
 from fcrepo.connection import FedoraConnectionException
 import logging
+import newrelic.agent
 
 logger = logging.getLogger('fcrepo.object.FedoraObject')
 class FedoraObject(object):
+    @newrelic.agent.function_trace()
     def __init__(self, pid, client):
         self.pid = pid
         self.client = client
@@ -15,6 +17,7 @@ class FedoraObject(object):
         self._methods = None
         self._ds_cache = {}
         
+    @newrelic.agent.function_trace()
     def _setProperty(self, name, value):
         msg = u'Changed %s object property' % name
         kwargs = {name: value, 'logMessage': msg}
@@ -32,6 +35,7 @@ class FedoraObject(object):
     createdDate = property(lambda self: self._info['createdDate'])
     lastModifiedDate = property(lambda self: self._info['lastModifiedDate'])
 
+    @newrelic.agent.function_trace()
     def datastreams(self):
         if self._dsids is None:
             '''
@@ -51,13 +55,16 @@ class FedoraObject(object):
                 self._dsids = []
                 logger.debug('Unable to get the list of datastream! (perhaps the object has been purged?) Returning an empty list.')
         return self._dsids
-
+    
+    @newrelic.agent.function_trace()
     def __iter__(self):
         return iter(self.datastreams())
     
+    @newrelic.agent.function_trace()
     def __in__(self, dsid):
         return dsid in self.datastreams()
-
+    
+    @newrelic.agent.function_trace()
     def __getitem__(self, dsid):
         ds = self._ds_cache.get(dsid)
         if not ds is None:
@@ -71,22 +78,27 @@ class FedoraObject(object):
         self._ds_cache[dsid] = ds
         return ds
 
+    @newrelic.agent.function_trace()
     def __delitem__(self, dsid):
         self.client.deleteDatastream(self.pid, dsid)
         self._dsids = None
 
+    @newrelic.agent.function_trace()
     def delete(self, **params):
         self.client.deleteObject(self.pid, **params)
         
+    @newrelic.agent.function_trace()
     def addDataStream(self, dsid, body='', **params):            
         self.client.addDatastream(self.pid, dsid, body, **params)
         self._dsids=None
 
+    @newrelic.agent.function_trace()
     def methods(self):
         if self._methods is None:
             self._methods = self.client.getAllObjectMethods(self.pid)
         return [m[1] for m in self._methods]
 
+    @newrelic.agent.function_trace()
     def call(self, method_name, **params):
         for sdef, method in self._methods:
             if method == method_name:

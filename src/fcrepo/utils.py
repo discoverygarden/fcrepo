@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict
+import newrelic.agent
 
 from lxml import etree
 from lxml.builder import ElementMaker
@@ -19,7 +20,8 @@ NAMESPACES = {'rdf': u'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
               'dcterms': u'http://purl.org/dc/terms/'}
 
 class Namespaces(dict):
-
+    
+    @newrelic.agent.function_trace()
     def __getattr__(self, prefix):
         value = self.get(prefix)
         if value is None:
@@ -28,18 +30,21 @@ class Namespaces(dict):
         ns = Namespace(value)
         return ns
 
+    @newrelic.agent.function_trace()
     def url_split(self, url):
         name = url.rsplit('/', 1)[-1].rsplit(':', 1)[-1].rsplit('#', 1)[-1]
         ns = url[:-len(name)]
         return ns, name
         
+    @newrelic.agent.function_trace()
     def prefix_url(self, url):
         ns, name = self.url_split(url)
         prefix = [prefix for (prefix, n) in self.items() if n == ns]
         if not prefix:
             raise ValueError('Can not prefix URL: "%s"' % url)
         return '%s:%s' % (prefix[0], name)
-
+    
+    @newrelic.agent.function_trace()
     def expand_url(self, url):
         prefix, rest = url.split(':', 1)
         try:
@@ -49,24 +54,26 @@ class Namespaces(dict):
         return ns + rest
 
 class Namespace(unicode):
-
+    @newrelic.agent.function_trace()
     @property
     def title(self):
         return '%stitle' % self
 
+    @newrelic.agent.function_trace()
     @property
     def format(self):
         return '%sformat' % self
     
+    @newrelic.agent.function_trace()
     def __getattr__(self, name):
         return '%s%s' % (self, name)
-
+    @newrelic.agent.function_trace()
     def __getitem__(self, name):
         return self.__getattr__(name)
 
 NS = Namespaces(NAMESPACES)
 NSXML = 'http://www.w3.org/XML/1998/namespace'
-
+@newrelic.agent.function_trace()
 def dict2rdfxml(subject, predicates):
     rdf = ElementMaker(namespace=NS.rdf, nsmap=dict(NS))
     doc = rdf.RDF()
@@ -94,7 +101,7 @@ def dict2rdfxml(subject, predicates):
                           encoding='UTF-8',
                           pretty_print=True,
                           xml_declaration=False)
-
+@newrelic.agent.function_trace()
 def rdfxml2dict(rdfxml):
     doc = etree.fromstring(rdfxml)
     subject = None

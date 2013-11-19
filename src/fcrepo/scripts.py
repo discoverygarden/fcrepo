@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 from ConfigParser import ConfigParser
+import newrelic.agent
 
 
 FEDORA_INSTALL_PROPERTIES="""
@@ -36,13 +37,13 @@ FEDORA_HOST = 'localhost'
 FEDORA_PORT = '8080'
 FEDORA_PASSWD = 'fedoraAdmin'
 
-
+@newrelic.agent.function_trace()
 def get_fedora_version():
     config = ConfigParser()
     config.read( os.path.join(os.getcwd(), 'buildout.cfg') )
     return config.get('buildout', 'extends').replace('profiles/', '')
 
-
+@newrelic.agent.function_trace()
 def check_java_version():
     try:
         output = subprocess.Popen(['java','-version'],    
@@ -57,7 +58,7 @@ def check_java_version():
         print >> sys.stderr, ('java not installed')
         sys.exit(1)
 
-
+@newrelic.agent.function_trace()
 def install_fedora():
     base_dir = os.path.join(os.getcwd(), 'parts')
 
@@ -95,7 +96,7 @@ def install_fedora():
     os.system('java -jar "%s" "%s"' % (jarfile, fp.name))
     os.remove(fp.name)
 
-
+@newrelic.agent.function_trace()
 def start_fedora():
     if get_fedora_version() == 'fedora-3.3.cfg':
         fedora_path = os.path.join(os.getcwd(), 'parts', 'fedora-3.3')

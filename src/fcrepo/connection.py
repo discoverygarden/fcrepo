@@ -3,6 +3,7 @@
 import StringIO, socket, httplib, urlparse, logging
 from time import sleep
 from copy import copy
+import newrelic.agent
 
 class APIException(Exception):
     """ An exception in the general usage of the API """
@@ -11,15 +12,18 @@ class APIException(Exception):
     
 class FedoraConnectionException(Exception):
     """ An exception thrown by Fedora connections """
+    @newrelic.agent.function_trace()
     def __init__(self, httpcode, reason=None, body=None):
         self.httpcode = httpcode
         self.reason = reason
         self.body = body
-
+        
+    @newrelic.agent.function_trace()
     def __repr__(self):
         return 'HTTP code=%s, Reason=%s, body=%s' % (
                     self.httpcode, self.reason, self.body.splitlines()[0])
-
+        
+    @newrelic.agent.function_trace()
     def __str__(self):
         return repr(self)
 
@@ -29,6 +33,7 @@ class Connection(object):
     Represents a connection to a Fedora-Commons Repository using the REST API
     http://fedora-commons.org/confluence/display/FCR30/REST+API    
     """
+    @newrelic.agent.function_trace()
     def __init__(self, url, debug=False,
                  username=None, password=None, 
                  persistent=False):
@@ -60,9 +65,11 @@ class Connection(object):
                                 self.password)).encode('base64').strip()
             self.form_headers['Authorization'] = 'Basic %s' % token
         
+    @newrelic.agent.function_trace()
     def close(self):
         self.conn.close()
 
+    @newrelic.agent.function_trace()
     def open(self, url, body='', headers=None, method='GET'):
         if headers is None:
             http_headers = {}
@@ -126,12 +133,14 @@ class Connection(object):
                     sleep(5)
         if not self.persistent:
            self.close()
-        
+
+    @newrelic.agent.function_trace()
     def _reconnect(self):
         self.reconnects += 1
         self.close()
         self.conn.connect()
-        
+
+@newrelic.agent.function_trace()
 def check_response_status(response):
     if response.status not in (200, 201, 204):
         ex = FedoraConnectionException(response.status, response.reason)
