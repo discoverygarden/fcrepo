@@ -3,6 +3,7 @@
 import StringIO, socket, httplib, urlparse, logging
 from time import sleep
 from copy import copy
+import newrelic.agent
 
 class APIException(Exception):
     """ An exception in the general usage of the API """

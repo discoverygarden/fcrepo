@@ -4,6 +4,7 @@
 from fcrepo.datastream import FedoraDatastream, RELSEXTDatastream, DCDatastream
 from fcrepo.connection import FedoraConnectionException
 import logging
+import newrelic.agent
 
 logger = logging.getLogger('fcrepo.object.FedoraObject')
 class FedoraObject(object):

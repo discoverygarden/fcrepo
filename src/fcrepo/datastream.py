@@ -4,6 +4,7 @@
 from collections import defaultdict
 
 from lxml import etree
+import newrelic.agent
 
 from fcrepo.utils import rdfxml2dict, dict2rdfxml
     

@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 from ConfigParser import ConfigParser
+import newrelic.agent
 
 
 FEDORA_INSTALL_PROPERTIES="""

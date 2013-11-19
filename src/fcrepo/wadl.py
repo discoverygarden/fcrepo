@@ -2,6 +2,7 @@
 # See also LICENSE.txt
 
 import urllib
+import newrelic.agent
 
 from lxml import etree
 

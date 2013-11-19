@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict
+import newrelic.agent
 
 from lxml import etree
 from lxml.builder import ElementMaker

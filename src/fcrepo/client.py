@@ -3,6 +3,7 @@
 
 import urllib
 from collections import defaultdict
+import newrelic.agent
 
 from copy import copy
 
