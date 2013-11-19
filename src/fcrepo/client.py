@@ -16,9 +16,11 @@ from fcrepo.object import FedoraObject
 NSMAP = {'foxml': 'info:fedora/fedora-system:def/foxml#'}
 
 class FedoraClient(object):
+    @newrelic.agent.function_trace()
     def __init__(self, connection):
         self.api = API(connection)
 
+    @newrelic.agent.function_trace()
     def getNextPID(self, namespace, numPIDs=1, format=u'text/xml'):
         request = self.api.getNextPID()
         response = request.submit(namespace=namespace,
@@ -41,6 +43,7 @@ class FedoraClient(object):
             return ids[0]
         return ids
 
+    @newrelic.agent.function_trace()
     def createObject(self, pid, label, state=u'A'):
         foxml = ElementMaker(namespace=NSMAP['foxml'], nsmap=NSMAP)
         foxml_state = {'A': u'Active',
@@ -60,10 +63,12 @@ class FedoraClient(object):
         request.headers['Content-Type'] = 'text/xml; charset=utf-8'
         response = request.submit(body, state=state[0], label=label)
         return self.getObject(pid)
-    
+
+    @newrelic.agent.function_trace()
     def getObject(self, pid):
         return FedoraObject(pid, self)
 
+    @newrelic.agent.function_trace()
     def getObjectProfile(self, pid):
         request = self.api.getObjectProfile(pid=pid)
         response = request.submit(format=u'text/xml')
@@ -88,14 +93,17 @@ class FedoraClient(object):
             result[name] = value
         return result
 
+    @newrelic.agent.function_trace()
     def updateObject(self, pid, body='', **params):
         request = self.api.updateObject(pid=pid)
         response = request.submit(body, **params)
 
+    @newrelic.agent.function_trace()
     def deleteObject(self, pid, **params):
         request = self.api.deleteObject(pid=pid)
         response = request.submit(**params)
-        
+
+    @newrelic.agent.function_trace()
     def listDatastreams(self, pid):
         request = self.api.listDatastreams(pid=pid)
         response = request.submit(format=u'text/xml')
@@ -104,6 +112,7 @@ class FedoraClient(object):
         doc = etree.fromstring(xml)
         return [child.attrib['dsid'] for child in doc]
 
+    @newrelic.agent.function_trace()
     def addDatastream(self, pid, dsid, body='', **params):
         if dsid == 'RELS-EXT' and not body:
             body = ('<rdf:RDF xmlns:rdf="%s"/>' % NS.rdf)
@@ -126,6 +135,7 @@ class FedoraClient(object):
         request.headers['Content-Type'] = params['mimeType']
         response = request.submit(body, **params)        
 
+    @newrelic.agent.function_trace()
     def _fix_ds_params(self, params):
         for name, param in params.items():
             newname = {'label': 'dsLabel',
@@ -136,7 +146,8 @@ class FedoraClient(object):
                 del params[name]
                 
         return params
-        
+
+    @newrelic.agent.function_trace()
     def getDatastreamProfile(self, pid, dsid):
         request = self.api.getDatastreamProfile(pid=pid, dsID=dsid)
         response = request.submit(format=u'text/xml')
@@ -173,19 +184,23 @@ class FedoraClient(object):
                 result[name] = value
         return result
 
+    @newrelic.agent.function_trace()
     def modifyDatastream(self, pid, dsid, body='', **params):
         params = self._fix_ds_params(params)
         request = self.api.modifyDatastream(pid=pid, dsID=dsid)
         response = request.submit(body, **params)
         
+    @newrelic.agent.function_trace()
     def getDatastream(self, pid, dsid):
         request = self.api.getDatastream(pid=pid, dsID=dsid)
         return request.submit()
 
+    @newrelic.agent.function_trace()
     def deleteDatastream(self, pid, dsid, **params):
         request = self.api.deleteDatastream(pid=pid, dsID=dsid)
         return request.submit(**params)
 
+    @newrelic.agent.function_trace()
     def getAllObjectMethods(self, pid, **params):
         params['format'] = u'text/xml'
         request = self.api.getAllObjectMethods(pid=pid)
@@ -201,12 +216,13 @@ class FedoraClient(object):
         response.close()
         return method_list
 
+    @newrelic.agent.function_trace()
     def invokeSDefMethodUsingGET(self, pid, sdef, method, **params):
         request = self.api.invokeSDefMethodUsingGET(pid=pid, sDef=sdef,
                                                     method=method)
         return request.submit(**params)
 
-        
+    @newrelic.agent.function_trace()
     def searchObjects(self, query, fields, terms=False, maxResults=10):
         field_params = {}
         assert isinstance(fields, list)
@@ -263,7 +279,7 @@ class FedoraClient(object):
                     data[field_name].append(value)
                 yield data
 
-                
+    @newrelic.agent.function_trace()
     def searchTriples(self, query, lang='sparql', format='Sparql',
                       limit=100, type='tuples', dt='on', flush=True):
         
