@@ -17,7 +17,8 @@ complete REST API.
 On top of that a more highlevel abstraction is written, which will be
 demonstrated in this `doctest`_.
 This package has been written for FedoraCommons 3.3 and 3.4, it has not been 
-tested with older versions. REST API documentation can be found in the 
+tested with older versions.  It has been tested with newer Fedoras and will not
+work with fedora >= 3.6 due to WADL issues. REST API documentation can be found in the 
 `Fedora wiki`_.
 
 
